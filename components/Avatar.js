@@ -10,15 +10,20 @@ export default function Avatar({ size, url, editable, onChange }) {
 
   async function handleAvatarChange(ev) {
     const file = ev.target.files?.[0];
-    if (file) {
-      setIsUploading(true);
-      await uploadUserProfileImage(supabase, session.user.id, file); // Destructure session.user.id
+    if (!file) return; // Early return if no file selected
+
+    setIsUploading(true);
+    try {
+      await uploadUserProfileImage(supabase, session.user.id, file);
       setIsUploading(false);
       if (onChange) onChange();
+    } catch (error) {
+      // Handle image upload error (e.g., display error message)
+      console.error("Error uploading avatar:", error);
     }
   }
 
-  const width = size === "lg" ? "w-24 md:w-36" : "w-12"; // Ternary for width
+  const width = size === "lg" ? "w-24 md:w-36" : "w-12";
 
   return (
     <div className={`${width} relative`}>
@@ -35,7 +40,7 @@ export default function Avatar({ size, url, editable, onChange }) {
       {editable && (
         <label
           className="absolute bottom-0 right-0 shadow-md shadow-gray-500 p-2 bg-white rounded-full cursor-pointer"
-          title="Change avatar" // Add alt text for accessibility
+          title="Change avatar"
         >
           <input type="file" className="hidden" onChange={handleAvatarChange} />
           <svg
